@@ -1,24 +1,25 @@
 import 'package:flutter/foundation.dart';
-import 'package:pokedex/data/http_client.dart';
+import 'package:pokedex/data/network/dio_api_client.dart';
 import 'package:pokedex/data/pokemon_detail_response.dart';
 import 'package:pokedex/data/pokemon_list_response.dart';
+import 'package:pokedex/data/state/remote_state.dart';
 
 class PokemonService {
-  final serviceName = 'pokemon';
-  final http = HttpClient();
+  final serviceName = '/pokemon';
+  final http = DioApiClient();
 
-  Future<PokemonListResponse> fetchPokemons() async {
+  Future<RemoteState> fetchPokemons() async {
     try {
       if (kDebugMode) {
-        print("$serviceName");
+        print(serviceName);
       }
 
-      final response = await http.client.get(
-        Uri.parse('${http.baseUrl}/$serviceName'),
-      );
+      final response = await http.dio.get(serviceName);
 
       if (response.statusCode == 200) {
-        return pokemonListResponseFromJson(response.body);
+        return RemoteStateSuccess<PokemonListResponse>(
+          PokemonListResponse.fromJson(response.data as Map<String, dynamic>),
+        );
       } else {
         throw Exception("Failed to load pokemons");
       }
@@ -27,14 +28,14 @@ class PokemonService {
     }
   }
 
-  Future<PokemonDetailResponse> fetchPokemonDetail(int pokemonId) async {
+  Future<RemoteState> fetchPokemonDetail(int pokemonId) async {
     try {
-      final response = await http.client.get(
-        Uri.parse('${http.baseUrl}/$serviceName/$pokemonId'),
-      );
+      final response = await http.dio.get('$serviceName/$pokemonId');
 
       if (response.statusCode == 200) {
-        return pokemonDetailResponseFromJson(response.body);
+        return RemoteStateSuccess<PokemonDetailResponse>(
+          PokemonDetailResponse.fromJson(response.data as Map<String, dynamic>),
+        );
       } else {
         throw Exception('Failed to load pokemon details');
       }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokemon_detail_response.dart';
 import 'package:pokedex/data/pokemon_service.dart';
+import 'package:pokedex/data/state/remote_state.dart';
 import 'package:pokedex/utils/pokemon_card_colors.dart';
 
 class PokemonDetailPage extends StatefulWidget {
@@ -28,10 +29,12 @@ class _PokemonDetailPageState extends State<PokemonDetailPage> {
     try {
       final result = await pokemonService.fetchPokemonDetail(widget.pokemonId);
       if (!mounted) return;
-      setState(() {
-        _pokemon = result;
-        _isLoading = false;
-      });
+      if (result is RemoteStateSuccess<PokemonDetailResponse>) {
+        setState(() {
+          _pokemon = result.data;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {

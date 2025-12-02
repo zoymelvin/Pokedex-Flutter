@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex/data/pokemon_list_response.dart';
 import 'package:pokedex/data/pokemon_service.dart';
+import 'package:pokedex/data/state/remote_state.dart';
 import 'package:pokedex/pages/detail_page.dart';
 import 'package:pokedex/utils/pokemon_card_colors.dart';
 
@@ -21,9 +22,10 @@ class _HomePageState extends State<HomePage> {
     Future.microtask(() async {
       try {
         final result = await pokemonService.fetchPokemons();
-        if (mounted) {
+        if (!mounted) return;
+        if (result is RemoteStateSuccess<PokemonListResponse>) {
           setState(() {
-            pokemonList = result.results;
+            pokemonList = result.data.results;
           });
         }
       } catch (e) {
